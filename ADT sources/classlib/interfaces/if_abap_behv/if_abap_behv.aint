@@ -1,0 +1,210 @@
+interface if_abap_behv
+  public .
+
+
+
+* ATTENTION ATTENTION ATTENTION
+*
+* This type is used by BDL / BEHAVIOR compilation.
+* Keep it small. Do not change w/o good reason (and in sync with kernel).
+*
+* Do NOT introduce references INTO other ABAP units, such as CL=>TYPE, TPOL_TYPE, etc.
+* Shallow reference (TYPE REF TO CL/IF) is acceptable.
+  types:
+    t_char01 type c length 1 .
+  types:
+    t_xflag type x length 1.
+  types:
+    tt_message type standard table of ref to if_abap_behv_message with empty key .
+  types:
+    begin of enum t_fail_cause structure cause,
+      unspecific   value is initial,
+      unauthorized value 401,
+      "   forbidden         value 403,
+      not_found    value 404,
+      "   op_not_allowed    value 405,
+      conflict     value 409,    " 7.84
+      "   gone              value 410,
+      "   unprocessable     value 422,
+      locked       value 423,
+      "! failure of dependent instances (failing %CID_REF predecessor)
+      dependency   value 424,    " 7.85
+      "! failure due to operation control violation
+      disabled     value 4221,    " 7.85
+      "! failure due to field control violation
+      readonly     value 4222,    " 7.85
+      "   internal_error    value 500,
+      "   not_implemented   value 501,
+    end of enum t_fail_cause structure cause .
+  types:
+    begin of enum t_phase structure phases,
+      initial           value is initial,
+      finalize          value 2,
+      cleanup_finalize  value 3,
+      check_before_save value 4,
+      adjust_numbers    value 6,
+      save              value 8,
+      cleanup           value 9,
+    end of enum t_phase structure phases .
+  types:
+    begin of t_failinfo,
+      cause type t_fail_cause,
+      "      phase type T_PHASE,
+    end of t_failinfo .
+  types:
+    begin of enum t_image structure image,
+      transactional,
+      before,
+    end of enum t_image structure image .
+  types:
+    "! Aspects of permissions
+    begin of enum t_permissions_only structure permissions_only base type t_xflag,
+      all                    value is initial,
+      authorization          value 'EE',
+      features               value 'DD',
+      global_authorization   value 'EF',
+      global_features        value 'DF',
+      global                 value 'CF',
+      instance_authorization value 'FE',
+      instance_features      value 'FD',
+      instance               value 'FC',
+    end of enum t_permissions_only structure permissions_only.
+  types t_message type ref to if_t100_dyn_msg .
+
+  constants:
+    "! Constants for X(1) fields in structures %CONTROL, %ELEMENT etc.
+    begin of mk,
+      "! Unmark field
+      off type ABP_BEHV_FLAG value '00',
+      "! Mark field
+      on  type ABP_BEHV_FLAG value '01',
+    end of mk.
+
+  constants:
+    "! Constants for Dynamic EML
+    begin of op,
+      "! Dynamic MODIFY
+      begin of m,
+        "! Standard operation 'Create'
+        create    type t_char01 value 'C',
+        "! Standard operation 'Update'
+        update    type t_char01 value 'U',
+        "! Standard operation 'Delete'
+        delete    type t_char01 value 'D',
+        "! Action invocation
+        action    type t_char01 value 'A',
+        "! Create by association
+        create_ba type t_char01 value 'O',
+      end of m ,
+      "! Dynamic READ
+      begin of r,
+        "! Operation 'Read'
+        read     type t_char01 value 'R',
+        "! Read by association
+        read_ba  type t_char01 value 'N',
+        "! Function invocation
+        evaluate type t_char01 value 'E',
+      end of r,
+    end of op .
+
+  constants:
+    "! Constants for Cumulated Changes (Draft Additional Save)
+    begin of cop,
+      create type t_char01 value 'C',
+      update type t_char01 value 'U',
+      delete type t_char01 value 'D',
+    end of cop.
+
+  constants:
+    "! Feature Control: Constants for FEATURES method and GET FEATURES result
+    "! <p>NOTE: Initial value = unrestricted, non-initial = restriction (combinable by + or BIT-OR)</p>
+    begin of fc,
+      "! Field Control
+      begin of f,
+        "! Field has no restrictions
+        unrestricted type ABP_BEHV_FIELD_CTRL value '00',
+        "! Field is mandatory
+        mandatory    type ABP_BEHV_FIELD_CTRL value '01',
+        "! Field is readonly
+        read_only    type ABP_BEHV_FIELD_CTRL value '02',
+        "! Request all restrictions
+        all          type ABP_BEHV_FIELD_CTRL value 'FF',
+      end of f,
+      "! Operation Control
+      begin of o,
+        "! Operation is enabled
+        enabled  type ABP_BEHV_OP_CTRL value '00',
+        "! Operation is disabled
+        disabled type ABP_BEHV_OP_CTRL value '01',
+      end of o,
+    end of fc.
+
+  constants:
+    "! Authorization: Constants for AUTHORIZATION method
+    begin of auth,
+      "! Operation is allowed
+      allowed      type ABP_BEHV_AUTH value '00',
+      "! Operation is unauthorized
+      unauthorized type ABP_BEHV_AUTH value '01',
+    end of auth.
+
+  constants:
+    "! Permissions: Constants for GET PERMISSIONS result
+    "! <p>NOTE: Initial value = unrestricted, non-initial = restriction (combinable by + or BIT-OR)</p>
+    begin of perm,
+      "! Field Permissions
+      begin of f,
+        "! Field has no restrictions
+        unrestricted type ABP_BEHV_FIELD_PERM value '00',
+        "! Field is mandatory
+        mandatory    type ABP_BEHV_FIELD_PERM value '01',
+        "! Field is readonly
+        read_only    type ABP_BEHV_FIELD_PERM value '02',
+        "! Field is mandatory at create
+        mandatory_create    type ABP_BEHV_FIELD_PERM value '10',
+        "! Field is readonly at update
+        read_only_update    type ABP_BEHV_FIELD_PERM value '20',
+        "! Field is mandatory at update
+        mandatory_update    type ABP_BEHV_FIELD_PERM value '40',
+        "! Field is readonly at create
+        read_only_create    type ABP_BEHV_FIELD_PERM value '80',
+        "! Request all restrictions
+        all          type ABP_BEHV_FIELD_PERM value 'FF',
+      end of f,
+      "! Operation Permissions
+      begin of o,
+        "! Operation is enabled
+        enabled  type ABP_BEHV_OP_PERM value '00',
+        "! Operation is disabled
+        disabled type ABP_BEHV_OP_PERM value '01',
+        "! Operation is unauthorized
+        unauthorized type ABP_BEHV_OP_PERM value '02',
+      end of o,
+    end of perm.
+
+  constants:
+    "! DO NOT USE (obsolete)
+    begin of permreq,
+      none type t_char01 value ' ', independent type t_char01 value 'X', modify type t_char01 value 'M',
+    end of permreq .
+
+  constants:
+    "! Constant to indicate transient message in determination/validation
+    state_area_none type string value `%NONE`,
+    "! Constant to indicate 'any' state area (i.e. all state messages for an instance)
+    state_area_all  type string value `%ALL`.
+
+  constants:
+    "! Constants for Dynamic Type Creation
+    begin of typekind,
+      "! 'In' Type e.g. for Update, Read, Action Import
+      import  type ABP_BEHV_TYPEKIND value ' ',
+      "! 'Out' Type e.g. for Read, Action Result
+      result  type ABP_BEHV_TYPEKIND value 'R',
+      "! 'Link' Type for Read by Association
+      link    type ABP_BEHV_TYPEKIND value 'L',
+      "! 'Request' Type for Feature Control
+      request type ABP_BEHV_TYPEKIND value 'Q',
+    end of typekind .
+
+endinterface.

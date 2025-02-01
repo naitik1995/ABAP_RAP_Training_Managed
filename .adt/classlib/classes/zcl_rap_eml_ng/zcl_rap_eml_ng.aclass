@@ -1,0 +1,134 @@
+CLASS zcl_rap_eml_ng DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_oo_adt_classrun.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_rap_eml_ng IMPLEMENTATION.
+  METHOD if_oo_adt_classrun~main.
+
+    "Step 1 - READ
+*    READ ENTITIES OF ZI_RAP_ATRAVL_NG
+*    ENTITY Travel
+*    FROM VALUE #( ( TravelUUID = '544E3CD68FD04C311900AD62CC64C96A' ) )
+*    RESULT DATA(travels)
+*    FAILED DATA(failed)
+*    REPORTED DATA(reported).
+*
+*    out->write( travels ).
+*    out->write( failed ).
+*    out->write( reported ).
+
+" Step 2 - READ WITH FIELDS
+*     READ ENTITIES OF ZI_RAP_ATRAVL_NG
+*     ENTITY Travel
+*     FIELDS ( TravelID AgencyID CustomerID )
+*     WITH VALUE #( ( TravelUUID = '554E3CD68FD04C311900AD62CC64C96A' ) )
+*     RESULT DATA(travels).
+*
+*     out->write( travels ).
+
+     " Step 3 - READ ALL FIELDS
+*     READ ENTITIES OF ZI_RAP_ATRAVL_NG
+*     ENTITY Travel
+*     FIELDS ( AgencyID CustomerID )
+*     WITH VALUE #( ( TravelUUID = '554E3CD68FD04C311900AD62CC64C96A' ) )
+*     RESULT DATA(travels).
+
+      "Step 4 - READ WITH ASSOCIATION
+*      READ ENTITIES OF ZI_RAP_ATRAVL_NG
+*      ENTITY Travel BY \_Booking
+*      ALL FIELDS WITH VALUE #( ( TravelUUID = '554E3CD68FD04C311900AD62CC64C96A' ) )
+*      RESULT DATA(travels).
+
+      "Step 5 - READ UUID that does not exist
+*      READ ENTITIES OF ZI_RAP_ATRAVL_NG
+*      ENTITY Travel
+*      ALL FIELDS WITH VALUE #( ( TravelUUID = '09ABCFAB' ) )
+*      RESULT DATA(travels)
+*      FAILED DATA(failed)
+*      REPORTED DATA(reported).
+*
+*
+*     out->write( travels ).
+*     out->write( failed ).
+*     out->write( reported ).
+
+      "Step 6 - MODIFY operations
+*      MODIFY ENTITIES OF ZI_RAP_ATRAVL_NG
+*      ENTITY Travel
+*      UPDATE
+*      SET FIELDS WITH VALUE #( ( TravelUUID = '554E3CD68FD04C311900AD62CC64C96A'
+*      Description = 'Custom description updated'  ) )
+*      FAILED DATA(failed)
+*      REPORTED DATA(reported).
+*
+*      IF failed IS NOT INITIAL.
+*        out->write( failed ).
+*      ELSE.
+*
+*        COMMIT ENTITIES RESPONSE OF ZI_RAP_ATRAVL_NG
+*        FAILED DATA(failed_commit)
+*        REPORTED DATA(reported_commit).
+*        IF failed_commit IS INITIAL.
+*            out->write( 'Data updated successfully' ).
+*            out->write( reported ).
+*        ELSE.
+*            out->write( failed_commit ).
+*        ENDIF.
+*      ENDIF.
+
+       "Step 7 - CREATE OPERATION
+*       MODIFY ENTITIES OF ZI_RAP_ATRAVL_NG
+*       ENTITY Travel
+*       CREATE
+*       SET FIELDS WITH VALUE #( (
+*       %cid = 'MyContentID_1'
+*       AgencyID = '70012'
+*       CustomerID = '14'
+*       BeginDate = cl_abap_context_info=>get_system_date( )
+*       EndDate = cl_abap_context_info=>get_system_date( ) + 10
+*       Description = 'New entry added'
+*       ) )
+*       MAPPED DATA(mapped)
+*       FAILED DATA(failed)
+*       REPORTED DATA(reported).
+*
+*       out->write( 'Create done' ).
+*
+*       COMMIT ENTITIES RESPONSE OF ZI_RAP_ATRAVL_NG
+*       FAILED DATA(failed_commit)
+*       REPORTED DATA(reported_commit).
+
+       "Step 8 - DELETE
+       MODIFY ENTITIES OF ZI_RAP_ATRAVL_NG
+       ENTITY Travel
+       DELETE FROM VALUE #( ( TravelUUID = '9E1EE3D5F0AA1EDFB68082ABA0942AF9' ) )
+       FAILED DATA(failed)
+       REPORTED DATA(reported).
+       IF failed IS NOT INITIAL.
+       out->write( failed ).
+       out->write( reported ).
+       ELSE.
+       COMMIT ENTITIES RESPONSE OF ZI_RAP_ATRAVL_NG
+       FAILED DATA(failed_commit)
+       REPORTED DATA(reported_commit).
+       IF failed_commit IS NOT INITIAL.
+       out->write( failed_commit ).
+       ELSE.
+       out->write( 'record deleted' ).
+       ENDIF.
+       ENDIF.
+
+
+
+  ENDMETHOD.
+
+ENDCLASS.
